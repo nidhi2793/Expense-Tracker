@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expense Tracker</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp"
+      crossorigin="anonymous"
+    />
+
+    <style>
+      body {
+        padding: 7px;
+      }
+      #add {
+        margin-top: 6px;
+      }
+      .dltBtn {
+        border-radius: 20%;
+        background-color: red;
+        margin: 4px;
+      }
+      .editBtn {
+        border-radius: 20%;
+        background-color: green;
+        margin: 4px;
+        color: white;
+      }
+
+      li {
+        margin: 3px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <form>
+      <div class="mb-3">
+        <label class="form-label">Expense Amount</label>
+        <input type="number" class="form-control" id="expense" />
+      </div>
+      <div class="mb-3">
+        <label for="exampleInputPassword1" class="form-label"
+          >Description</label
+        >
+        <input type="text" class="form-control" id="description" />
+      </div>
+      <select
+        class="form-select"
+        aria-label="Default select example"
+        id="category"
+      >
+        <option selected value="0">Select Category</option>
+        <option value="1">Food</option>
+        <option value="2">Clothes</option>
+        <option value="3">Rent</option>
+        <option value="4">Movie</option>
+        <option value="5">Education</option>
+        <option value="6">Grocery</option>
+        <option value="7">Other</option>
+      </select>
+      <button type="submit" id="add" class="btn btn-primary">
+        Add Expense
+      </button>
+    </form>
+    <div>
+      <ul id="expenseList"></ul>
+    </div>
+    <script>
+      var add = document.getElementById("add");
+      add.addEventListener("click", addItem);
+      add.addEventListener("click", toLocalStorage);
+      var i = 0;
+
+      function addItem(e) {
+        e.preventDefault();
+        let amnt = document.getElementById("expense").value;
+        let description = document.getElementById("description").value;
+        let value = document.getElementById("category");
+        let category = value.options[value.selectedIndex].text;
+        let expenseList = document.getElementById("expenseList");
+        var li = document.createElement("li");
+        li.className = "list";
+        li.id = ++i;
+        li.appendChild(
+          document.createTextNode(amnt + " " + description + "-" + category)
+        );
+        var dlt = document.createElement("button");
+        dlt.addEventListener("click", removeItem);
+        dlt.className = "dltBtn";
+        dlt.id = "dlt";
+        dlt.appendChild(document.createTextNode("Delete"));
+        li.appendChild(dlt);
+        var edit = document.createElement("button");
+        edit.addEventListener("click", editItem);
+        edit.className = "editBtn";
+        edit.appendChild(document.createTextNode("Edit"));
+        li.appendChild(edit);
+        expenseList.appendChild(li);
+        document.getElementById("expense").value = "";
+        document.getElementById("description").value = "";
+        document.getElementById("category").value = 0;
+      }
+
+      function removeItem(e) {
+        e.preventDefault();
+        if (confirm("Should we delete this expense?")) {
+          var li = e.target.parentElement;
+          var k = li.id;
+          expenseList.removeChild(li);
+          // console.log(li.id);
+        }
+
+        var Expense = JSON.parse(localStorage.getItem("Expense"));
+
+        Expense.forEach(function (item, index) {
+          if (k == item.id) {
+            var position = index;
+            localStorage.removeItem("Expense");
+            let arr = [];
+            for (let i = 0; i < position; i++) {
+              arr.push(Expense[i]);
+            }
+            for (let i = position + 1; i < Expense.length; i++) {
+              arr.push(Expense[i]);
+            }
+            localStorage.setItem("Expense", JSON.stringify(arr));
+          }
+        });
+      }
+      var j = 0;
+      function toLocalStorage(e) {
+        e.preventDefault();
+        let amnt = document.getElementById("expense").value;
+        let description = document.getElementById("description").value;
+        let value = document.getElementById("category");
+        let category = value.options[value.selectedIndex].text;
+        let obj = {
+          amount: amnt,
+          description: description,
+          category: category,
+        };
+        obj.id = ++j;
+        // console.log(obj.id);
+        let Expense = localStorage.getItem("Expense");
+        if (Expense === null) {
+          Expense = [];
+        } else {
+          Expense = JSON.parse(Expense);
+        }
+
+        Expense.push(obj);
+
+        localStorage.setItem("Expense", JSON.stringify(Expense));
+      }
+      function editItem(e) {
+        e.preventDefault();
+        if (confirm("want to edit this expense?")) {
+          var li = e.target.parentElement;
+          var k = li.id;
+          expenseList.removeChild(li);
+          // console.log(li.id);
+        }
+
+        var Expense = JSON.parse(localStorage.getItem("Expense"));
+
+        Expense.forEach(function (item, index) {
+          if (k == item.id) {
+            document.getElementById("expense").value = item.amount;
+            document.getElementById("description").value = item.description;
+            let value = document.getElementById("category");
+            value.options[value.selectedIndex].text = item.category;
+
+            var position = index;
+            localStorage.removeItem("Expense");
+
+            let arr = [];
+            for (let i = 0; i < position; i++) {
+              arr.push(Expense[i]);
+            }
+            for (let i = position + 1; i < Expense.length; i++) {
+              arr.push(Expense[i]);
+            }
+            localStorage.setItem("Expense", JSON.stringify(arr));
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
